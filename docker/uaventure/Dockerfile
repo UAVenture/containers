@@ -48,3 +48,8 @@ RUN git clone --depth 1 https://bitbucket.org/nuttx/tools.git /tmp/tools \
 RUN git clone --recursive https://github.com/google/bloaty.git /tmp/bloaty \
 	&& cd /tmp/bloaty && cmake -GNinja . && ninja bloaty && cp bloaty /usr/local/bin/ \
 	&& rm -rf /tmp/*
+
+# addition for grpc sim setup
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y --quiet --no-install-recommends install \
+		libgrpc-dev \
+	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
