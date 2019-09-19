@@ -19,7 +19,8 @@ RUN dpkg --add-architecture i386 \
 		gperf \
 		libc6:i386 \
 		libgcc1:i386 \
-		libncurses-dev \
+		libncurses5-dev \
+		lib32ncurses5 \
 		libtool \
 		pkg-config \
 		vim-common \
