@@ -1,0 +1,44 @@
+#
+# PX4 gazebo development environment
+#
+
+FROM uaventure/dev-rpi-base
+MAINTAINER Duarte Dias <duarte@uaventure.com>
+
+# we need to install this library because the next command points us to a more updated library og gazebo-common
+# which does not work with gazebo7 or libgazebo7-dev
+COPY gazebo7-common_7.0.0+dfsg-2_all.deb /usr/gazebo7-common_7.0.0+dfsg-2_all.deb
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y --quiet --no-install-recommends install ttf-dejavu-core
+RUN dpkg -i /usr/gazebo7-common_7.0.0+dfsg-2_all.deb
+
+# install gazebo, eigen, opencv
+RUN wget --quiet http://packages.osrfoundation.org/gazebo.key -O - | apt-key add - \
+	&& sh -c 'echo "deb http://packages.osrfoundation.org/gazebo/ubuntu-stable xenial main" > /etc/apt/sources.list.d/gazebo-stable.list' \
+	&& apt-get update \
+	&& DEBIAN_FRONTEND=noninteractive apt-get -y --quiet --no-install-recommends install \
+		ant \
+		gazebo7 \
+		gstreamer1.0-plugins-base \
+		libeigen3-dev \
+		libgazebo7-dev \
+		libopencv-dev \
+		libxml2-utils \
+		pkg-config \
+		protobuf-compiler \
+	&& apt-get -y autoremove \
+	&& apt-get clean autoclean \
+	&& rm -rf /var/lib/apt/lists/{apt,dpkg,cache,log} /tmp/* /var/tmp/*
+
+# install MAVLink headers
+RUN	git clone --depth 1 https://github.com/mavlink/c_library_v2.git /usr/local/include/mavlink/v2.0 && rm -rf /usr/local/include/mavlink/v2.0/.git
+
+# Some QT-Apps/Gazebo don't not show controls without this
+ENV QT_X11_NO_MITSHM 1
+
+# Gazebo 7 crashes on VM with OpenGL 3.3 support, so downgrade to OpenGL 2.1
+# http://answers.gazebosim.org/question/13214/virtual-machine-not-launching-gazebo/
+# https://www.mesa3d.org/vmware-guest.html
+ENV SVGA_VGPU10 0
+
+# Use UTF8 encoding in java tools (needed to compile jMAVSim)
+ENV JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF8
